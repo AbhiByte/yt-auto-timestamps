@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Video Comment Timestamp Extension",
+  "version": "1.0",
+  "description": "Automatically injects timestamps into comments referencing quotes in a video.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/watch*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
