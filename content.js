@@ -1,4 +1,7 @@
 // content.js
+
+console.log("%c Content script loaded ", "background: #222; color: #bada55");
+
 async function fetchYouTubeTranscript() {
   const videoId = new URLSearchParams(window.location.search).get("v");
   if (!videoId) {
@@ -30,28 +33,29 @@ function extractComments() {
     element: element,
   }));
 }
-// Step 3: Analyze comments and match with the video transcript
+
 function findMatchingTimestamp(comment, transcriptWithTimestamps) {
   // Try to find the comment text (or a portion of it) in the video transcript
   const foundEntry = transcriptWithTimestamps.find((entry) =>
-    comment.text.toLowerCase().includes(entry.transcript.toLowerCase())
+    comment.text.toLowerCase().includes(entry.text.toLowerCase())
   );
 
   if (foundEntry) {
-    return foundEntry.timestamp; // Return the timestamp for the matching transcript
+    return foundEntry.start; // Return the timestamp for the matching transcript
   }
 
   return null;
 }
 
-// Step 4: Inject the timestamp into the comment
 function injectTimestamp(commentElement, timestamp) {
   const timestampLink = document.createElement("a");
   const minutes = Math.floor(timestamp / 60);
-  const seconds = timestamp % 60;
+  const seconds = Math.floor(timestamp % 60);
 
-  timestampLink.href = `#`; // You could improve this by making it link directly to the video timestamp
-  timestampLink.innerText = `Jump to ${minutes}:${seconds}`;
+  timestampLink.href = `#`;
+  timestampLink.innerText = `Jump to ${minutes}:${seconds
+    .toString()
+    .padStart(2, "0")}`;
   timestampLink.style.color = "blue";
   timestampLink.style.cursor = "pointer";
 
@@ -74,6 +78,8 @@ async function main() {
     console.log("No transcript available for this video");
     return;
   }
+
+  console.log("Transcript:", transcript);
 
   const comments = extractComments();
 
