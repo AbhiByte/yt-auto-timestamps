@@ -3,7 +3,15 @@
   "name": "Video Comment Timestamp Extension",
   "version": "1.0",
   "description": "Automatically injects timestamps into comments referencing quotes in a video.",
-  "permissions": ["activeTab", "storage", "scripting"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "https://youtube-transcript.vercel.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["*://www.youtube.com/watch*"],
