@@ -1,5 +1,35 @@
 // content.js
+async function fetchYouTubeTranscript() {
+  const videoId = new URLSearchParams(window.location.search).get("v");
+  if (!videoId) {
+    console.error("No video ID found");
+    return null;
+  }
 
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage(
+      { action: "fetchTranscript", videoId },
+      (response) => {
+        if (response.error) {
+          console.error("Error fetching transcript:", response.error);
+          resolve(null);
+        } else {
+          resolve(response.transcript);
+        }
+      }
+    );
+  });
+}
+
+function extractComments() {
+  const commentElements = document.querySelectorAll(
+    "ytd-comment-thread-renderer"
+  );
+  return Array.from(commentElements).map((element) => ({
+    text: element.querySelector("#content-text").textContent,
+    element: element,
+  }));
+}
 // Step 3: Analyze comments and match with the video transcript
 function findMatchingTimestamp(comment, transcriptWithTimestamps) {
   // Try to find the comment text (or a portion of it) in the video transcript
@@ -38,17 +68,17 @@ function injectTimestamp(commentElement, timestamp) {
   commentElement.appendChild(timestampLink);
 }
 
-// Step 5: Combine everything and execute when the page is loaded
 async function main() {
-  const videoUrl = document.querySelector("video").src;
+  const transcript = await fetchYouTubeTranscript();
+  if (!transcript) {
+    console.log("No transcript available for this video");
+    return;
+  }
 
-  // Call to transcript.js function to transcribe the video (you will need to make sure this function works correctly)
-  const transcriptWithTimestamps = await transcribeVideo(videoUrl);
-
-  const comments = extractComments(); // Extract all comments from the page
+  const comments = extractComments();
 
   comments.forEach((comment) => {
-    const timestamp = findMatchingTimestamp(comment, transcriptWithTimestamps);
+    const timestamp = findMatchingTimestamp(comment, transcript);
     if (timestamp !== null) {
       injectTimestamp(comment.element, timestamp);
     }
